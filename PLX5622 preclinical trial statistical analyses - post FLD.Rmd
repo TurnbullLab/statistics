@@ -1,0 +1,83 @@
+---
+title: "PLX5622 preclinical trial - post FLD analysis"
+author: "Hari Rallapalli"
+date: "July 18, 2018"
+output: 
+  html_document:
+    toc: true
+    theme: united
+---
+
+Goals and data - FLD retrospective analysis
+==============
+
+
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+rm(list = ls())
+library(FSA)
+library(car)
+library(lme4)
+library(stats)
+library(dplyr)
+library(ggpubr)
+library(multcomp)
+library(lmerTest)
+```
+
+```{r, echo=FALSE, warning=FALSE}
+posttreatmentpath <- file.path("Y:", "turnbulllab","turnbulllabspace","Labusers","Hari","Papers","Pipeline","Results Assets","PLX Trial Statistics - Revised JL","PLXTrial_PostreatmentVolumes_PCAFLD.csv")
+posttreatmentpath = normalizePath(posttreatmentpath)
+posttreatmentdata = read.csv(posttreatmentpath)
+str(posttreatmentdata)
+
+```
+
+```{r}
+
+posttreatmentdata$cond = interaction(posttreatmentdata$treatment,posttreatmentdata$tmxdose)
+
+posttreatmentdata %>% group_by(tmxdose,treatment) %>% summarise(n = n(), mean(prevolumemm), sd(prevolumemm), mean(postvolumemm), mean(normalizedvolume), sd(normalizedvolume))  %>% knitr::kable()
+
+
+```
+
+```{r}
+
+pretreatmentmodel = lmer (prevolumemm ~ 0 + cond + (1|subject), data = posttreatmentdata) 
+
+pretreatmentmodel %>% summary()
+
+
+
+pretreatmentmodel %>% glht(linfct = mcp(cond="Tukey")) %>% summary()
+
+posttreatmentdata %>% ggboxplot(x = "cond", y = "prevolumemm", add = "jitter", xlab = "condition", ylab = "pretreatment volume (mm^3)")
+
+
+
+```
+
+
+```{r}
+posttreatmentmodel = lmer (normalizedvolume ~ 0 + cond + (1|subject), data = posttreatmentdata) 
+
+posttreatmentmodel %>% summary()
+
+posttreatmentmodel %>% glht(linfct = mcp(cond="Tukey")) %>% summary()
+
+
+posttreatmentdata %>% ggboxplot(x = "cond", y = "normalizedvolume", add = "jitter", xlab = "condition", ylab = "posttreatment normalized volume")
+posttreatmentdata %>% ggboxplot(x = "cond", y = "postvolumemm", add = "jitter", xlab = "condition", ylab = "posttreatment volume (mm^3)")
+
+
+```
+
+```{r}
+prepostmodel = lmer(postvolumemm ~ 0 + prevolumemm  + cond + (1|subject), data = posttreatmentdata) ## why can't I pipe the data to the model? :(
+
+
+prepostmodel %>% summary()
+prepostmodel %>% ranova()
+
+```
