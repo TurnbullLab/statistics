@@ -20,3 +20,15 @@ library(lmerTest)
 
 PLX 5622 preclinical trial data analysis
 ===========================
+
+This document will detail all of the methods used for statistical analyses of the PLX5622 preclinical trial dataset.
+
+An overview of the data frame (the dataset format used in R) is provided below:
+
+```{r, echo=FALSE, warning=FALSE}
+posttreatmentpath <- file.path("Y:", "turnbulllab","turnbulllabspace","Labusers","Hari","Papers","Pipeline","Results Assets","PLX Trial Statistics - Revised JL","PLXTrial_PostreatmentVolumes.csv")
+posttreatmentpath = normalizePath(posttreatmentpath)
+posttreatmentdata = read.csv(posttreatmentpath)
+str(posttreatmentdata)
+
+```
