@@ -2,9 +2,13 @@
 title: "Supplement 2 - Pipeline paper"
 author: "Hari Rallapalli"
 date: "July 23, 2018"
-output: html_document
-toc: true
-theme: 
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    code_folding: hide
+    theme: united
+    highlight: tango
 ---
 ```{r, echo=FALSE, warning=FALSE, message=FALSE}
 rm(list = ls())
@@ -30,5 +34,35 @@ posttreatmentpath <- file.path("Y:", "turnbulllab","turnbulllabspace","Labusers"
 posttreatmentpath = normalizePath(posttreatmentpath)
 posttreatmentdata = read.csv(posttreatmentpath)
 str(posttreatmentdata)
+
+
+```
+
+
+
+Heading descriptors
+----------------
+- 'subject' is our animal identifier.
+- 'hemisphere' specifies which side of the cerebellum, divided by the central sulcus, this specific tumor appears. Please note that some animals have two tumors, one in each hemisphere.
+- 'tmxdose' specifies tumor initiation model, i.e. 1µg/g or 5 µg/g TMX
+- 'sex' is the sex of the animal
+- 'treatment' specifies either control (CTL) or drug (PLX) group
+- 'time' is the age (in days) of the animal at the last imaging timepoint
+- 'timeaftertreatment' is the time (in days) after treatment start
+- 'volumecm' is the tumor volume (in cm^3) at endpoint
+- 'postvolumemm' is the tumor volume (in mm^3) at endpoint
+- 'prevolumemm' is the tumor volume (mm^3) at the imaging timepoint just before treatment start
+- 'normalizedvolume' is equivalent to (postvolumemm-prevolumemm)/(prevolumemm*timeaftertreatment)
+
+
+I am interested in the interaction between 'treatment' and 'tmxdose' as these serve as the different arms of our study.
+
+
+
+```{r,warning=FALSE}
+posttreatmentdata$cond = interaction(posttreatmentdata$treatment,posttreatmentdata$tmxdose)
+
+posttreatmentdata %>% group_by(tmxdose,treatment) %>% summarise(n = n(), mean(prevolumemm), sd(prevolumemm), mean(postvolumemm), mean(normalizedvolume), sd(normalizedvolume))  %>% knitr::kable()
+
 
 ```
